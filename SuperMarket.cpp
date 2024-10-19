@@ -6,31 +6,32 @@
 #include <algorithm>
 #include <cctype>
 #include <locale>
+#include <iomanip> // For text formatting like setw
 using namespace std;
 
-// Trim from start (left)
-static inline std::string ltrim(std::string s)
-{
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch)
-                                    { return !std::isspace(ch); }));
-    return s;
-}
+// // Trim from start (left)
+// static inline std::string ltrim(std::string s)
+// {
+//     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch)
+//                                     { return !std::isspace(ch); }));
+//     return s;
+// }
 
-// Trim from end (right)
-static inline std::string rtrim(std::string s)
-{
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch)
-                         { return !std::isspace(ch); })
-                .base(),
-            s.end());
-    return s;
-}
+// // Trim from end (right)
+// static inline std::string rtrim(std::string s)
+// {
+//     s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch)
+//                          { return !std::isspace(ch); })
+//                 .base(),
+//             s.end());
+//     return s;
+// }
 
 // Trim from both ends
-static inline std::string trim(std::string s)
-{
-    return ltrim(rtrim(s));
-}
+// static inline std::string trim(std::string s)
+// {
+//     return ltrim(rtrim(s));
+// }
 int order = 1;
 class Cart
 {
@@ -244,6 +245,192 @@ public:
         }
     }
 };
+
+// string trim(const string &str)
+// {
+//     size_t first = str.find_first_not_of(' '); // Find the first non-space character
+//     size_t last = str.find_last_not_of(' ');   // Find the last non-space character
+
+//     if (first == string::npos || last == string::npos)
+//     {
+//         return ""; // If all characters are spaces or empty string, return empty string
+//     }
+
+//     return str.substr(first, (last - first + 1)); // Return the substring with no spaces at the start or end
+// }
+
+// A simple hash function (for demonstration purposes)
+string hashPassword(const string &password)
+{
+    unsigned long hash = 0;
+    for (char c : password)
+    {
+        hash = (hash * 31) + c; // Using a basic hashing method
+    }
+    stringstream ss;
+    ss << hex << hash; // Convert the hash to a hexadecimal string
+    return ss.str();
+}
+
+// Function to trim leading and trailing whitespace from a string
+string trim(const string &str)
+{
+    size_t first = str.find_first_not_of(' ');
+    size_t last = str.find_last_not_of(' ');
+    if (first == string::npos || last == string::npos)
+    {
+        return ""; // Empty or all spaces
+    }
+    return str.substr(first, (last - first + 1));
+}
+
+// Register Admin function
+bool registerAdmin()
+{
+    string username, password;
+    cout << "\tRegister Admin" << endl;
+    cout << "\tUsername: ";
+    cin.ignore();              // To clear any remaining newline characters from previous input
+    getline(cin, username);    // Using getline to handle spaces
+    username = trim(username); // Trim leading/trailing spaces
+
+    cout << "\tPassword: ";
+    getline(cin, password); // Using getline for password as well
+    password = trim(password);
+
+    // Hash the password
+    string hashedPassword = hashPassword(password);
+
+    ofstream outFile("admin_credentials.csv", ios::app);
+    if (!outFile.is_open())
+    {
+        cout << "\tError: Unable to open admin credentials file." << endl;
+        return false;
+    }
+
+    outFile << username << "," << hashedPassword << endl;
+    outFile.close();
+
+    cout << "\tAdmin registered successfully!" << endl;
+    return true;
+}
+
+// Login Admin function
+bool loginAdmin()
+{
+    string username, password;
+    cout << "\tLogin Admin" << endl;
+    cout << "\tUsername: ";
+    cin.ignore();           // To clear any remaining newline characters from previous input
+    getline(cin, username); // Using getline to handle spaces
+    username = trim(username);
+
+    cout << "\tPassword: ";
+    getline(cin, password); // Using getline for password as well
+    password = trim(password);
+
+    // Hash the input password
+    string hashedPassword = hashPassword(password);
+
+    ifstream inFile("admin_credentials.csv");
+    if (!inFile.is_open())
+    {
+        cout << "\tError: Unable to open admin credentials file." << endl;
+        return false;
+    }
+
+    string line, storedUsername, storedPassword;
+    while (getline(inFile, line))
+    {
+        stringstream ss(line);
+        getline(ss, storedUsername, ',');
+        getline(ss, storedPassword, ',');
+
+        if (storedUsername == username && storedPassword == hashedPassword)
+        {
+            cout << "\tAdmin logged in successfully!" << endl;
+            inFile.close();
+            return true;
+        }
+    }
+    inFile.close();
+    cout << "\tInvalid username or password." << endl;
+    return false;
+}
+
+// Register Customer function
+bool registerCustomer()
+{
+    string username, password;
+    cout << "\tRegister Customer" << endl;
+    cout << "\tUsername: ";
+    cin.ignore();           // To clear any remaining newline characters from previous input
+    getline(cin, username); // Using getline to handle spaces
+    username = trim(username);
+
+    cout << "\tPassword: ";
+    getline(cin, password); // Using getline for password as well
+    password = trim(password);
+
+    // Hash the password
+    string hashedPassword = hashPassword(password);
+
+    ofstream outFile("customer_credentials.csv", ios::app);
+    if (!outFile.is_open())
+    {
+        cout << "\tError: Unable to open customer credentials file." << endl;
+        return false;
+    }
+
+    outFile << username << "," << hashedPassword << endl;
+    outFile.close();
+
+    cout << "\tCustomer registered successfully!" << endl;
+    return true;
+}
+
+// Login Customer function
+bool loginCustomer()
+{
+    string username, password;
+    cout << "\tLogin Customer" << endl;
+    cout << "\tUsername: ";
+    cin.ignore();           // To clear any remaining newline characters from previous input
+    getline(cin, username); // Using getline to handle spaces
+    username = trim(username);
+
+    cout << "\tPassword: ";
+    getline(cin, password); // Using getline for password as well
+    password = trim(password);
+
+    // Hash the input password
+    string hashedPassword = hashPassword(password);
+
+    ifstream inFile("customer_credentials.csv");
+    if (!inFile.is_open())
+    {
+        cout << "\tError: Unable to open customer credentials file." << endl;
+        return false;
+    }
+
+    string line, storedUsername, storedPassword;
+    while (getline(inFile, line))
+    {
+        stringstream ss(line);
+        getline(ss, storedUsername, ',');
+        getline(ss, storedPassword, ',');
+
+        if (storedUsername == username && storedPassword == hashedPassword)
+        {
+            cout << "\tCustomer logged in successfully!" << endl;
+            inFile.close();
+            return true;
+        }
+    }
+    inFile.close();
+    cout << "\tInvalid username or password." << endl;
+    return false;
+}
 
 // Helper function to check if a string is numeric
 bool isNumeric(const string &str)
@@ -538,6 +725,7 @@ void printBill()
 
 void manageStock()
 {
+
     int choice;
     cout << "\tStock Management" << endl;
     cout << "\t****************" << endl;
@@ -682,106 +870,512 @@ void removeItemFromBill()
     rename("cart_temp.csv", "cart.csv");
 }
 
+// int main()
+// {
+//     Cart b;
+//     bool exit = false;
+
+//     while (!exit)
+//     {
+//         Sleep(3000);
+//         system("cls");
+//         int roleChoice;
+//         cout << "\tWelcome To Super Market Billing And Management System" << endl;
+//         cout << "\t***********************************************" << endl;
+//         cout << "\t\t1. Admin (Store Manager)." << endl;
+//         cout << "\t\t2. Customer." << endl;
+//         cout << "\t\t3. Exit." << endl;
+//         cout << "\t\tEnter Choice: ";
+//         cin >> roleChoice;
+
+//         if (roleChoice == 1) // Admin Section
+//         {
+//             int loginChoice;
+//             cout << "\t1. Register as Admin." << endl;
+//             cout << "\t2. Login as Admin." << endl;
+//             cout << "\tEnter choice: ";
+//             cin >> loginChoice;
+
+//             if (loginChoice == 1)
+//             {
+//                 registerAdmin();
+//                 Sleep(2000);
+//             }
+//             else if (loginChoice == 2 && loginAdmin()) // If login is successful
+//             {
+//                 bool adminExit = false;
+//                 while (!adminExit)
+//                 {
+//                     Sleep(3000);
+//                     system("cls");
+//                     int adminChoice;
+
+//                     cout << "\tAdmin Section" << endl;
+//                     cout << "\t******************************" << endl;
+//                     cout << "\t\t1. Manage Stock." << endl;
+//                     cout << "\t\t2. Exit to Main Menu." << endl;
+//                     cout << "\t\tEnter Choice: ";
+//                     cin >> adminChoice;
+
+//                     if (adminChoice == 1)
+//                     {
+//                         system("cls");
+//                         manageStock(); // Admin manages the stock (you need to define this function)
+//                         Sleep(2000);
+//                     }
+//                     else if (adminChoice == 2)
+//                     {
+//                         adminExit = true;
+//                     }
+//                 }
+//             }
+//         }
+//         else if (roleChoice == 2) // Customer Section
+//         {
+//             int loginChoice;
+//             cout << "\t1. Register as Customer." << endl;
+//             cout << "\t2. Login as Customer." << endl;
+//             cout << "\tEnter choice: ";
+//             cin >> loginChoice;
+
+//             if (loginChoice == 1)
+//             {
+//                 registerCustomer();
+//                 Sleep(2000);
+//             }
+//             else if (loginChoice == 2 && loginCustomer()) // If login is successful
+//             {
+//                 bool customerExit = false;
+//                 while (!customerExit)
+//                 {
+//                     Sleep(3000);
+//                     system("cls");
+//                     int val;
+
+//                     cout << "\tCustomer Section" << endl;
+//                     cout << "\t******************************" << endl;
+//                     cout << "\t\t1. Add Item to Cart." << endl;
+//                     cout << "\t\t2. Remove Item from Cart." << endl;
+//                     cout << "\t\t3. Empty the Cart." << endl;
+//                     cout << "\t\t4. Print Bill." << endl;
+//                     cout << "\t\t5. Exit to Main Menu." << endl;
+//                     cout << "\t\tEnter Choice: ";
+//                     cin >> val;
+
+//                     if (val == 1)
+//                     {
+//                         system("cls");
+//                         addItem(b); // Add item for the customer bill
+//                         Sleep(2000);
+//                     }
+//                     else if (val == 2)
+//                     {
+//                         removeItemFromBill();
+//                         Sleep(2000);
+//                     }
+//                     else if (val == 3)
+//                     {
+//                         clearBill();
+//                         Sleep(2000);
+//                     }
+//                     else if (val == 4)
+//                     {
+//                         printBill(); // Print the customer's bill
+//                         Sleep(2000);
+//                     }
+//                     else if (val == 5)
+//                     {
+//                         customerExit = true; // Go back to main menu
+//                     }
+//                 }
+//             }
+//         }
+//         else if (roleChoice == 3) // Exit the system
+//         {
+//             exit = true;
+//             system("cls");
+//             cout << "\tGoodbye!" << endl;
+//             Sleep(2000);
+//         }
+//         else
+//         {
+//             cout << "\tInvalid Choice. Please Try Again." << endl;
+//             Sleep(2000);
+//         }
+//     }
+// }
+
+// void displayHeader(const string &title)
+// {
+//     system("cls");
+//     cout << "\n\t************************************************************\n";
+//     cout << "\t*                                                          *\n";
+//     cout << "\t*              " << setw(50) << left << title << " *\n";
+//     cout << "\t*                                                          *\n";
+//     cout << "\t************************************************************\n\n";
+// }
+
+// void mainMenuHeader()
+// {
+//     cout << "\n\t\t==================== WELCOME ====================\n";
+//     cout << "\t\t         Super Market Billing & Management System         \n";
+//     cout << "\t\t=========================================================\n\n";
+// }
+
+// int main()
+// {
+//     Cart b;
+//     bool exit = false;
+
+//     while (!exit)
+//     {
+//         Sleep(1000); // Less wait time for smoother experience
+//         displayHeader("Main Menu");
+
+//         int roleChoice;
+//         mainMenuHeader();
+//         cout << "\t\t1. Admin (Store Manager)." << endl;
+//         cout << "\t\t2. Customer." << endl;
+//         cout << "\t\t3. Exit." << endl;
+//         cout << "\n\t\tEnter Choice: ";
+//         cin >> roleChoice;
+
+//         if (roleChoice == 1) // Admin Section
+//         {
+//             int loginChoice;
+//             displayHeader("Admin Login/Registration");
+//             cout << "\t1. Register as Admin." << endl;
+//             cout << "\t2. Login as Admin." << endl;
+//             cout << "\n\tEnter choice: ";
+//             cin >> loginChoice;
+
+//             if (loginChoice == 1)
+//             {
+//                 registerAdmin();
+//                 Sleep(1000);
+//             }
+//             else if (loginChoice == 2 && loginAdmin()) // If login is successful
+//             {
+//                 bool adminExit = false;
+//                 while (!adminExit)
+//                 {
+//                     Sleep(1000);
+//                     displayHeader("Admin Section");
+
+//                     int adminChoice;
+//                     cout << "\tAdmin Section Menu" << endl;
+//                     cout << "\t===================" << endl;
+//                     cout << "\t1. Manage Stock." << endl;
+//                     cout << "\t2. Exit to Main Menu." << endl;
+//                     cout << "\n\tEnter Choice: ";
+//                     cin >> adminChoice;
+
+//                     if (adminChoice == 1)
+//                     {
+//                         displayHeader("Stock Management");
+//                         manageStock(); // Admin manages the stock
+//                         Sleep(1000);
+//                     }
+//                     else if (adminChoice == 2)
+//                     {
+//                         adminExit = true;
+//                     }
+//                 }
+//             }
+//         }
+//         else if (roleChoice == 2) // Customer Section
+//         {
+//             int loginChoice;
+//             displayHeader("Customer Login/Registration");
+//             cout << "\t1. Register as Customer." << endl;
+//             cout << "\t2. Login as Customer." << endl;
+//             cout << "\n\tEnter choice: ";
+//             cin >> loginChoice;
+
+//             if (loginChoice == 1)
+//             {
+//                 registerCustomer();
+//                 Sleep(1000);
+//             }
+//             else if (loginChoice == 2 && loginCustomer()) // If login is successful
+//             {
+//                 bool customerExit = false;
+//                 while (!customerExit)
+//                 {
+//                     Sleep(1000);
+//                     displayHeader("Customer Section");
+
+//                     int val;
+//                     cout << "\tCustomer Section Menu" << endl;
+//                     cout << "\t=======================" << endl;
+//                     cout << "\t1. Add Item to Cart." << endl;
+//                     cout << "\t2. Remove Item from Cart." << endl;
+//                     cout << "\t3. Empty the Cart." << endl;
+//                     cout << "\t4. Print Bill." << endl;
+//                     cout << "\t5. Exit to Main Menu." << endl;
+//                     cout << "\n\tEnter Choice: ";
+//                     cin >> val;
+
+//                     if (val == 1)
+//                     {
+//                         displayHeader("Add Item to Cart");
+//                         addItem(b); // Add item for the customer bill
+//                         Sleep(1000);
+//                     }
+//                     else if (val == 2)
+//                     {
+//                         displayHeader("Remove Item from Cart");
+//                         removeItemFromBill();
+//                         Sleep(1000);
+//                     }
+//                     else if (val == 3)
+//                     {
+//                         displayHeader("Empty Cart");
+//                         clearBill();
+//                         Sleep(1000);
+//                     }
+//                     else if (val == 4)
+//                     {
+//                         displayHeader("Bill");
+//                         printBill(); // Print the customer's bill
+//                         Sleep(1000);
+//                     }
+//                     else if (val == 5)
+//                     {
+//                         customerExit = true; // Go back to main menu
+//                     }
+//                 }
+//             }
+//         }
+//         else if (roleChoice == 3) // Exit the system
+//         {
+//             exit = true;
+//             displayHeader("Exiting...");
+//             cout << "\tThank you for using the Super Market Billing System!" << endl;
+//             Sleep(2000);
+//         }
+//         else
+//         {
+//             cout << "\n\tInvalid Choice. Please Try Again." << endl;
+//             Sleep(1000);
+//         }
+//     }
+// }
+
+#include <iostream>
+#include <windows.h> // For Sleep function
+#include <iomanip>   // For text formatting like setw
+using namespace std;
+
+void displayHeader(const string &title)
+{
+    system("cls");
+    cout << "\n\t************************************************************\n";
+    cout << "\t*                                                          *\n";
+    cout << "\t*              " << setw(50) << left << title << " *\n";
+    cout << "\t*                                                          *\n";
+    cout << "\t************************************************************\n\n";
+}
+
+void printDivider()
+{
+    cout << "\n\t============================================================\n";
+}
+
+void printFancyDivider()
+{
+    cout << "\n\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+}
+
+void mainMenuHeader()
+{
+    cout << "\n\t==================== WELCOME ====================\n";
+    cout << "\t||                                                  ||\n";
+    cout << "\t||        Super Market Billing & Management System   ||\n";
+    cout << "\t||                                                  ||\n";
+    cout << "\t======================================================\n\n";
+}
+
+void adminSectionHeader()
+{
+    cout << "\n\t\t[ Admin Section - Manage Everything! ]" << endl;
+    printFancyDivider();
+}
+
+void customerSectionHeader()
+{
+    cout << "\n\t\t[ Customer Section - Shopping Made Easy! ]" << endl;
+    printFancyDivider();
+}
+
+void addArt()
+{
+    cout << "\t______________________[ Add to Cart ]______________________\n";
+    cout << "\t|                                                      |\n";
+    cout << "\t|   Add Items to your Cart and Enjoy Shopping!          |\n";
+    cout << "\t|______________________________________________________|\n";
+}
+
+void removeArt()
+{
+    cout << "\t______________________[ Remove from Cart ]______________________\n";
+    cout << "\t|                                                      |\n";
+    cout << "\t|   Remove Items if you changed your mind!              |\n";
+    cout << "\t|______________________________________________________|\n";
+}
+
+void printBillArt()
+{
+    cout << "\t______________________[ Bill ]______________________\n";
+    cout << "\t|                                                      |\n";
+    cout << "\t|   Check your Bill and Get Ready to Pay!               |\n";
+    cout << "\t|______________________________________________________|\n";
+}
 int main()
 {
     Cart b;
-
     bool exit = false;
+
     while (!exit)
     {
-        system("cls");
+        Sleep(1000); // Less wait time for smoother experience
+        displayHeader("Main Menu");
+
         int roleChoice;
-        cout << "\tWelcome To Super Market Billing And Management System" << endl;
-        cout << "\t***********************************************" << endl;
+        mainMenuHeader();
         cout << "\t\t1. Admin (Store Manager)." << endl;
         cout << "\t\t2. Customer." << endl;
         cout << "\t\t3. Exit." << endl;
+        printDivider();
         cout << "\t\tEnter Choice: ";
         cin >> roleChoice;
 
         if (roleChoice == 1) // Admin Section
         {
-            bool adminExit = false;
-            while (!adminExit)
+            int loginChoice;
+            displayHeader("Admin Login/Registration");
+            cout << "\t1. Register as Admin." << endl;
+            cout << "\t2. Login as Admin." << endl;
+            printDivider();
+            cout << "\tEnter choice: ";
+            cin >> loginChoice;
+
+            if (loginChoice == 1)
             {
-                system("cls");
-                int adminChoice;
-
-                cout << "\tAdmin Section" << endl;
-                cout << "\t******************************" << endl;
-                cout << "\t\t1. Manage Stock." << endl;
-                cout << "\t\t2. Exit to Main Menu." << endl;
-                cout << "\t\tEnter Choice: ";
-                cin >> adminChoice;
-
-                if (adminChoice == 1)
+                registerAdmin();
+                Sleep(1000);
+            }
+            else if (loginChoice == 2 && loginAdmin()) // If login is successful
+            {
+                bool adminExit = false;
+                while (!adminExit)
                 {
-                    system("cls");
-                    manageStock(); // Admin manages the stock (you need to define this function)
-                    Sleep(2000);
-                }
-                else if (adminChoice == 2)
-                {
-                    adminExit = true; // Go back to the main menu
+                    Sleep(1000);
+                    adminSectionHeader();
+
+                    int adminChoice;
+                    cout << "\tAdmin Section Menu" << endl;
+                    cout << "\t===================" << endl;
+                    cout << "\t1. Manage Stock." << endl;
+                    cout << "\t2. Exit to Main Menu." << endl;
+                    printDivider();
+                    cout << "\tEnter Choice: ";
+                    cin >> adminChoice;
+
+                    if (adminChoice == 1)
+                    {
+                        displayHeader("Stock Management");
+                        manageStock(); // Admin manages the stock
+                        Sleep(1000);
+                    }
+                    else if (adminChoice == 2)
+                    {
+                        adminExit = true;
+                    }
                 }
             }
         }
         else if (roleChoice == 2) // Customer Section
         {
-            bool customerExit = false;
-            while (!customerExit)
+            int loginChoice;
+            displayHeader("Customer Login/Registration");
+            cout << "\t1. Register as Customer." << endl;
+            cout << "\t2. Login as Customer." << endl;
+            printDivider();
+            cout << "\tEnter choice: ";
+            cin >> loginChoice;
+
+            if (loginChoice == 1)
             {
-                system("cls");
-                int val;
+                registerCustomer();
+                Sleep(1000);
+            }
+            else if (loginChoice == 2 && loginCustomer()) // If login is successful
+            {
+                bool customerExit = false;
+                while (!customerExit)
+                {
+                    Sleep(1000);
+                    customerSectionHeader();
 
-                cout << "\tCustomer Section" << endl;
-                cout << "\t******************************" << endl;
-                cout << "\t\t1. Add Item to Cart." << endl;
-                cout << "\t\t2. Remove Item to Cart." << endl;
-                cout << "\t\t3. Empty the Cart." << endl;
-                cout << "\t\t4. Print Bill." << endl;
-                cout << "\t\t5. Exit to Main Menu." << endl;
-                cout << "\t\tEnter Choice: ";
-                cin >> val;
+                    int val;
+                    cout << "\tCustomer Section Menu" << endl;
+                    cout << "\t=======================" << endl;
+                    cout << "\t1. Add Item to Cart." << endl;
+                    cout << "\t2. Remove Item from Cart." << endl;
+                    cout << "\t3. Empty the Cart." << endl;
+                    cout << "\t4. Print Bill." << endl;
+                    cout << "\t5. Exit to Main Menu." << endl;
+                    printDivider();
+                    cout << "\tEnter Choice: ";
+                    cin >> val;
 
-                if (val == 1)
-                {
-                    system("cls");
-                    addItem(b); // Add item for the customer bill
-                    Sleep(2000);
-                }
-                else if (val == 2)
-                {
-                    removeItemFromBill();
-                    Sleep(2000);
-                }
-                else if (val == 3)
-                {
-                    clearBill();
-                    Sleep(2000);
-                }
-                else if (val == 4)
-                {
-                    printBill(); // Print the customer's bill
-                    Sleep(2000);
-                }
-                else if (val == 5)
-                {
-                    customerExit = true; // Go back to main menu
+                    if (val == 1)
+                    {
+                        displayHeader("Add Item to Cart");
+                        addArt();
+                        addItem(b); // Add item for the customer bill
+                        Sleep(1000);
+                    }
+                    else if (val == 2)
+                    {
+                        displayHeader("Remove Item from Cart");
+                        removeArt();
+                        removeItemFromBill();
+                        Sleep(1000);
+                    }
+                    else if (val == 3)
+                    {
+                        displayHeader("Empty Cart");
+                        clearBill();
+                        Sleep(1000);
+                    }
+                    else if (val == 4)
+                    {
+                        displayHeader("Bill");
+                        printBillArt();
+                        printBill(); // Print the customer's bill
+                        Sleep(1000);
+                    }
+                    else if (val == 5)
+                    {
+                        customerExit = true; // Go back to main menu
+                    }
                 }
             }
         }
         else if (roleChoice == 3) // Exit the system
         {
             exit = true;
-            system("cls");
-            cout << "\tGoodbye!" << endl;
+            displayHeader("Exiting...");
+            cout << "\tGoodbye! 🌟" << endl;
+            cout << "\tThank you for using the Super Market Billing System!" << endl;
             Sleep(2000);
         }
         else
         {
-            cout << "\tInvalid Choice. Please Try Again." << endl;
-            Sleep(2000);
+            cout << "\n\tInvalid Choice. Please Try Again." << endl;
+            Sleep(1000);
         }
     }
 }
