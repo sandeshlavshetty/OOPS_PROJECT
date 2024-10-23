@@ -34,12 +34,12 @@ This C++-based application is designed to manage inventory for a retail store. I
    - Navigate to the project directory.
    - Compile the code using your C++ compiler:
      ```bash
-     g++ inventory_management.cpp -o inventory_management
+     g++ inventory_management.cpp -o SuperMarket
      ```
 2. **Run:**
    - Execute the compiled executable:
      ```bash
-     ./inventory_management
+     ./SuperMarket
      ```
 3. **Follow Prompts:**
    - The application will guide you through the various features.
