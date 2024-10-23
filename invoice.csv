@@ -1,2 +1,11 @@
 itemName, rateStr, quantityStr, amount, discount, discountedAmount
+tea,23,14,92,0,92
+coffee,20,1,20,0,20
+tea,23,4,92,0,92
+coffee,20,1,20,0,20
+sugar,25,13,75,10,68
+pen,21,9,42,1,42
+rice,56,12,112,2,110
+coffee,20,20,400,0,400
+sugar,25,2,50,10,45
 

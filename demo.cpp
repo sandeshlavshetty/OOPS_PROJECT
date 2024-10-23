@@ -6,18 +6,9 @@
 #include <algorithm>
 #include <cctype>
 #include <locale>
-#include <iomanip>
-#include <vector>
-#include <unordered_map>
-
+#include <iomanip> // For text formatting like setw
 using namespace std;
 
-struct StockItem
-{
-    string itemName;
-    int rate;
-    int availableQuantity;
-};
 int order = 1;
 class Cart
 {
@@ -70,6 +61,7 @@ private:
 public:
     Stock() : productName(""), price(0.0), quantity(0), discount(0.0) {}
 
+    // Setters
     void setProductName(string name)
     {
         productName = name;
@@ -90,6 +82,7 @@ public:
         discount = d;
     }
 
+    // Getters
     string getProductName() const
     {
         return productName;
@@ -113,7 +106,7 @@ public:
     // Function to add stock to CSV
     void addToStock()
     {
-        ofstream stockFile("stock.csv", ios::app);
+        ofstream stockFile("stock.csv", ios::app); // Appends to file
         ofstream total_inventory("inventory.csv", ios::app);
         if (!total_inventory.is_open())
         {
@@ -125,7 +118,7 @@ public:
             cout << "Error: Could not open stock file!" << endl;
             return;
         }
-
+        // Write the stock item in CSV format
         stockFile << productName << "," << price << "," << quantity << "," << discount << endl;
         total_inventory << productName << "," << price << "," << quantity << "," << discount << endl;
         stockFile.close();
@@ -158,13 +151,13 @@ public:
 
             if (prodName == name)
             {
-
+                // Update the stock data for the matched product
                 total_inventory_temp << name << "," << newPrice << "," << newQuantity << "," << newDiscount << endl;
                 found = true;
             }
             else
             {
-
+                // Write the existing data to the temp file
                 total_inventory_temp << line << endl;
             }
         }
@@ -181,10 +174,10 @@ public:
         total_inventory.close();
         total_inventory_temp.close();
 
+        // Replace the old stock file with the updated one
         remove("stock.csv");
         rename("temp.csv", "stock.csv");
     }
-
     // Function to update stock
     static void updateStock(string name, int newQuantity, double newPrice, double newDiscount)
     {
@@ -212,13 +205,13 @@ public:
 
             if (prodName == name)
             {
-
+                // Update the stock data for the matched product
                 tempFile << name << "," << newPrice << "," << newQuantity << "," << newDiscount << endl;
                 found = true;
             }
             else
             {
-
+                // Write the existing data to the temp file
                 tempFile << line << endl;
             }
         }
@@ -235,6 +228,7 @@ public:
         stockFile.close();
         tempFile.close();
 
+        // Replace the old stock file with the updated one
         remove("stock.csv");
         rename("temp.csv", "stock.csv");
     }
@@ -257,21 +251,24 @@ public:
             stringstream ss(line);
             string prodName;
 
+            // Read product name from line
             getline(ss, prodName, ',');
 
+            // If the product name doesn't match the one to remove, write it to the temp file
             if (prodName != name)
             {
                 total_inventory_temp << line << endl;
             }
             else
             {
-                found = true;
+                found = true; // Mark as found for feedback to the user
             }
         }
 
         total_inventory.close();
         total_inventory_temp.close();
 
+        // Replace old stock file with updated file
         remove("stock.csv");
         rename("temp.csv", "stock.csv");
 
@@ -305,21 +302,24 @@ public:
             stringstream ss(line);
             string prodName;
 
+            // Read product name from line
             getline(ss, prodName, ',');
 
+            // If the product name doesn't match the one to remove, write it to the temp file
             if (prodName != name)
             {
                 tempFile << line << endl;
             }
             else
             {
-                found = true;
+                found = true; // Mark as found for feedback to the user
             }
         }
 
         stockFile.close();
         tempFile.close();
 
+        // Replace old stock file with updated file
         remove("stock.csv");
         rename("temp.csv", "stock.csv");
 
@@ -334,274 +334,40 @@ public:
     }
 };
 
-class Invoice
-{
-private:
-    string itemName;
-    double rate;
-    int quantity;
-    double amount;
-    double discount;
-    double discountedAmount;
+// string trim(const string &str)
+// {
+//     size_t first = str.find_first_not_of(' '); // Find the first non-space character
+//     size_t last = str.find_last_not_of(' ');   // Find the last non-space character
 
-public:
-    Invoice(const string &itemName, double rate, int quantity, double amount, double discount, double discountedAmount)
-        : itemName(itemName), rate(rate), quantity(quantity), amount(amount), discount(discount), discountedAmount(discountedAmount) {}
+//     if (first == string::npos || last == string::npos)
+//     {
+//         return ""; // If all characters are spaces or empty string, return empty string
+//     }
 
-    string getItemName() const { return itemName; }
-    double getRate() const { return rate; }
-    int getQuantity() const { return quantity; }
-    double getAmount() const { return amount; }
-    double getDiscount() const { return discount; }
-    double getDiscountedAmount() const { return discountedAmount; }
-};
+//     return str.substr(first, (last - first + 1)); // Return the substring with no spaces at the start or end
+// }
 
-// Stock class definition
-class Stockr
-{
-private:
-    string productName;
-    double price;
-    int quantity;
-    double discount;
-
-public:
-    Stockr(const string &productName, double price, int quantity, double discount)
-        : productName(productName), price(price), quantity(quantity), discount(discount) {}
-
-    Stockr() : productName(""), price(0.0), quantity(0), discount(0.0) {}
-
-    string getProductName() const { return productName; }
-    double getPrice() const { return price; }
-    int getQuantity() const { return quantity; }
-    double getDiscount() const { return discount; }
-};
-
-// SalesReport class definition
-class SalesReport
-{
-private:
-    vector<Invoice> invoices;
-    vector<Stockr> stocks;
-    unordered_map<string, Stockr> stockMap;
-
-    // Helper function to print a horizontal bar chart
-    void printBarChart(const string &label, int value, int maxLabelLength, int scaleFactor = 1) const
-    {
-        cout << left << setw(maxLabelLength) << label << " | ";
-        for (int i = 0; i < value / scaleFactor; ++i)
-        {
-            cout << "*";
-        }
-        cout << " (" << value << ")\n";
-    }
-
-public:
-    void readInvoiceData(const string &filename)
-    {
-        ifstream file(filename);
-        string line;
-        getline(file, line);
-
-        while (getline(file, line))
-        {
-            stringstream ss(line);
-            string itemName;
-            double rate, amount, discount, discountedAmount;
-            int quantity;
-
-            getline(ss, itemName, ',');
-            ss >> rate;
-            ss.ignore();
-            ss >> quantity;
-            ss.ignore();
-            ss >> amount;
-            ss.ignore();
-            ss >> discount;
-            ss.ignore();
-            ss >> discountedAmount;
-
-            invoices.emplace_back(itemName, rate, quantity, amount, discount, discountedAmount);
-        }
-    }
-
-    void readStockData(const string &filename)
-    {
-        ifstream file(filename);
-        string line;
-        getline(file, line);
-
-        while (getline(file, line))
-        {
-            stringstream ss(line);
-            string productName;
-            double price, discount;
-            int quantity;
-
-            getline(ss, productName, ',');
-            ss >> price;
-            ss.ignore();
-            ss >> quantity;
-            ss.ignore();
-            ss >> discount;
-
-            Stockr stock(productName, price, quantity, discount);
-            stocks.push_back(stock);
-            stockMap[productName] = stock;
-        }
-    }
-
-    void generateSalesReport() const
-    {
-        double totalSales = 0;
-        double totalDiscount = 0;
-        int totalItemsSold = 0;
-
-        for (const auto &invoice : invoices)
-        {
-            totalSales += invoice.getDiscountedAmount();
-            totalDiscount += invoice.getDiscount();
-            totalItemsSold += invoice.getQuantity();
-        }
-
-        cout << "Total Sales:      $" << fixed << setprecision(2) << totalSales << endl;
-        cout << "Total Discount:   $" << fixed << setprecision(2) << totalDiscount << endl;
-        cout << "Total Items Sold: " << totalItemsSold << endl;
-    }
-
-    void profitAnalysis() const
-    {
-        double totalProfit = 0;
-        vector<pair<string, double>> profits;
-
-        for (const auto &invoice : invoices)
-        {
-            auto it = stockMap.find(invoice.getItemName());
-            if (it != stockMap.end())
-            {
-                double costPrice = it->second.getPrice() * invoice.getQuantity();
-                double profit = invoice.getDiscountedAmount() - costPrice;
-                totalProfit += profit;
-                profits.emplace_back(invoice.getItemName(), profit);
-            }
-        }
-
-        if (totalProfit < 0)
-        {
-            cout << "Encountered loss:  $" << fixed << setprecision(2) << totalProfit << endl;
-            // Line plot for profits with product names
-            cout << "\n Loss Per Sale :\n";
-            int maxLabelLength = 20;
-            for (const auto &entry : profits)
-            {
-                cout << left << setw(maxLabelLength) << entry.first << " | ";
-                int numStars = static_cast<int>(entry.second / 10);
-                for (int j = 0; j < numStars; ++j)
-                {
-                    cout << "*";
-                }
-                cout << " ($" << fixed << setprecision(2) << entry.second << ")\n";
-            }
-        }
-        else
-        {
-            cout << "Total Profit:      $" << fixed << setprecision(2) << totalProfit << endl;
-            // Line plot for profits with product names
-            cout << "\n Profit Per Sale :\n";
-            int maxLabelLength = 20;
-            for (const auto &entry : profits)
-            {
-                cout << left << setw(maxLabelLength) << entry.first << " | ";
-                int numStars = static_cast<int>(entry.second / 10);
-                for (int j = 0; j < numStars; ++j)
-                {
-                    cout << "*";
-                }
-                cout << " ($" << fixed << setprecision(2) << entry.second << ")\n";
-            }
-        }
-    }
-
-    void stockLevelAnalysis() const
-    {
-        cout << "\nStock Level Histogram:\n";
-        int maxLabelLength = 20;
-        for (const auto &stock : stocks)
-        {
-            printBarChart(stock.getProductName(), stock.getQuantity(), maxLabelLength, 2);
-        }
-    }
-
-    void topSellingProducts() const
-    {
-        unordered_map<string, int> productSales;
-        for (const auto &invoice : invoices)
-        {
-            productSales[invoice.getItemName()] += invoice.getQuantity();
-        }
-
-        cout << "\nTop-Selling Products Histogram:\n";
-        int maxLabelLength = 20;
-        for (const auto &entry : productSales)
-        {
-            printBarChart(entry.first, entry.second, maxLabelLength, 2);
-        }
-    }
-
-    void unsoldStockAnalysis() const
-    {
-        cout << "\nUnsold Stock Items:\n";
-        unordered_map<string, bool> soldItems;
-        for (const auto &invoice : invoices)
-        {
-            soldItems[invoice.getItemName()] = true;
-        }
-
-        for (const auto &stock : stocks)
-        {
-            if (soldItems.find(stock.getProductName()) == soldItems.end())
-            {
-                cout << stock.getProductName() << " - Quantity: " << stock.getQuantity() << endl;
-            }
-        }
-    }
-
-    void printHeader() const
-    {
-        cout << "****************************************************************************\n";
-        cout << "*                                                                          *\n";
-        cout << "*                         Sales Report                                     *\n";
-        cout << "*                                                                          *\n";
-        cout << "****************************************************************************\n\n";
-    }
-
-    void printFooter() const
-    {
-        cout << "\n\n************ End of Report ***********************\n";
-    }
-};
-
-// hash function
+// A simple hash function (for demonstration purposes)
 string hashPassword(const string &password)
 {
     unsigned long hash = 0;
     for (char c : password)
     {
-        hash = (hash * 31) + c;
+        hash = (hash * 31) + c; // Using a basic hashing method
     }
     stringstream ss;
     ss << hex << hash; // Convert the hash to a hexadecimal string
     return ss.str();
 }
 
-// Function to trim
-string trim1(const string &str)
+// Function to trim leading and trailing whitespace from a string
+string trim(const string &str)
 {
     size_t first = str.find_first_not_of(' ');
     size_t last = str.find_last_not_of(' ');
     if (first == string::npos || last == string::npos)
     {
-        return "";
+        return ""; // Empty or all spaces
     }
     return str.substr(first, (last - first + 1));
 }
@@ -612,13 +378,15 @@ bool registerAdmin()
     string username, password;
     cout << "\tRegister Admin" << endl;
     cout << "\tUsername: ";
-    cin.ignore(); // To clear any remaining newline characters from previous input
-    getline(cin, username);
-    username = trim1(username);
-    cout << "\tPassword: ";
-    getline(cin, password);
-    password = trim1(password);
+    cin.ignore();              // To clear any remaining newline characters from previous input
+    getline(cin, username);    // Using getline to handle spaces
+    username = trim(username); // Trim leading/trailing spaces
 
+    cout << "\tPassword: ";
+    getline(cin, password); // Using getline for password as well
+    password = trim(password);
+
+    // Hash the password
     string hashedPassword = hashPassword(password);
 
     ofstream outFile("admin_credentials.csv", ios::app);
@@ -635,20 +403,22 @@ bool registerAdmin()
     return true;
 }
 
+// changes done
 //  Login Admin function
 bool loginAdmin()
 {
     string username, password;
     cout << "\tLogin Admin" << endl;
     cout << "\tUsername: ";
-    cin.ignore();
-    getline(cin, username);
-    username = trim1(username);
+    cin.ignore();           // To clear any remaining newline characters from previous input
+    getline(cin, username); // Using getline to handle spaces
+    username = trim(username);
 
     cout << "\tPassword: ";
-    getline(cin, password);
-    password = trim1(password);
+    getline(cin, password); // Using getline for password as well
+    password = trim(password);
 
+    // Hash the input password
     string hashedPassword = hashPassword(password);
 
     ifstream inFile("admin_credentials.csv");
@@ -683,14 +453,15 @@ bool registerCustomer()
     string username, password;
     cout << "\tRegister Customer" << endl;
     cout << "\tUsername: ";
-    cin.ignore();
-    getline(cin, username);
-    username = trim1(username);
+    cin.ignore();           // To clear any remaining newline characters from previous input
+    getline(cin, username); // Using getline to handle spaces
+    username = trim(username);
 
     cout << "\tPassword: ";
-    getline(cin, password);
-    password = trim1(password);
+    getline(cin, password); // Using getline for password as well
+    password = trim(password);
 
+    // Hash the password
     string hashedPassword = hashPassword(password);
 
     ofstream outFile("customer_credentials.csv", ios::app);
@@ -713,14 +484,15 @@ bool loginCustomer()
     string username, password;
     cout << "\tLogin Customer" << endl;
     cout << "\tUsername: ";
-    cin.ignore();
-    getline(cin, username);
-    username = trim1(username);
+    cin.ignore();           // To clear any remaining newline characters from previous input
+    getline(cin, username); // Using getline to handle spaces
+    username = trim(username);
 
     cout << "\tPassword: ";
-    getline(cin, password);
-    password = trim1(password);
+    getline(cin, password); // Using getline for password as well
+    password = trim(password);
 
+    // Hash the input password
     string hashedPassword = hashPassword(password);
 
     ifstream inFile("customer_credentials.csv");
@@ -755,64 +527,13 @@ bool isNumeric(const string &str)
     return !str.empty() && all_of(str.begin(), str.end(), ::isdigit);
 }
 
-// Function to trim whitespace
-string trim(const string &str)
-{
-    size_t first = str.find_first_not_of(' ');
-    if (string::npos == first)
-    {
-        return str;
-    }
-    size_t last = str.find_last_not_of(' ');
-    return str.substr(first, (last - first + 1));
-}
-vector<StockItem> displayStock()
-{
-    vector<StockItem> stockList;
-    ifstream stockFile("stock.csv");
-    if (!stockFile.is_open())
-    {
-        cout << "\tError: Could not open stock.csv!" << endl;
-        return stockList;
-    }
-
-    string line, itemName, priceStr, quantityStr, discountStr;
-    cout << "\n\tAvailable Items in Stock:" << endl;
-    cout << "\t-----------------------------------------------------" << endl;
-    cout << "\t" << left << setw(5) << "No." << setw(15) << "Item Name" << setw(10) << "Price" << setw(10) << "Quantity" << endl;
-    cout << "\t-----------------------------------------------------" << endl;
-
-    int count = 1;
-    getline(stockFile, line);
-    while (getline(stockFile, line))
-    {
-        stringstream ss(line);
-        getline(ss, itemName, ',');
-        getline(ss, priceStr, ',');
-        getline(ss, quantityStr, ',');
-        getline(ss, discountStr, ',');
-
-        StockItem item;
-        item.itemName = trim(itemName);
-        item.rate = stoi(priceStr);
-        item.availableQuantity = stoi(quantityStr);
-
-        stockList.push_back(item);
-        cout << "\t" << left << setw(5) << count++ << setw(15) << item.itemName << setw(10) << item.rate << setw(10) << item.availableQuantity << endl;
-    }
-
-    cout << "\t-----------------------------------------------------" << endl;
-    stockFile.close();
-    return stockList;
-}
-
-void addItem(Cart &b)
+void addItem(Cart b)
 {
     bool close = false;
     while (!close)
     {
         int choice;
-        cout << "\t1. Add Item to Cart." << endl;
+        cout << "\t1. Add." << endl;
         cout << "\t2. Close." << endl;
         cout << "\tEnter Choice: ";
         cin >> choice;
@@ -820,70 +541,35 @@ void addItem(Cart &b)
         if (choice == 1)
         {
             system("cls");
+            string item;
+            int rate, quant;
 
-            // Display stock items in a table
-            vector<StockItem> stockList = displayStock();
-            if (stockList.empty())
-            {
-                cout << "\tNo items available in stock." << endl;
-                return;
-            }
+            cout << "\tEnter Item Name: ";
+            cin >> item;
+            b.setItem(item);
 
-            int itemNumber, quant;
-            cout << "\n\tEnter the number of the item you want to add: ";
-            cin >> itemNumber;
+            cout << "\tEnter Rate Of Item: ";
+            cin >> rate;
+            b.setRate(rate);
 
-            if (itemNumber < 1 || itemNumber > stockList.size())
-            {
-                cout << "\tInvalid item number! Please try again." << endl;
-                Sleep(2000);
-                return;
-            }
-
-            StockItem selectedItem = stockList[itemNumber - 1];
-
-            cout << "\tEnter Quantity for " << selectedItem.itemName << ": ";
+            cout << "\tEnter Quantity Of Item: ";
             cin >> quant;
+            b.setQuant(quant);
 
-            if (quant > selectedItem.availableQuantity)
+            // Open CSV file to append data
+            ofstream out("cart.csv", ios::app);
+            if (!out.is_open())
             {
-                cout << "\tError: Only " << selectedItem.availableQuantity << " units available!" << endl;
-                Sleep(2000);
-                return;
-            }
-
-            cout << "\n\tYou are adding " << quant << " units of " << selectedItem.itemName << " at a price of " << selectedItem.rate << " per unit." << endl;
-            cout << "\tTotal: " << quant * selectedItem.rate << endl;
-            cout << "\tConfirm? (y/n): ";
-            char confirm;
-            cin >> confirm;
-
-            if (confirm == 'y' || confirm == 'Y')
-            {
-
-                b.setItem(selectedItem.itemName);
-                b.setRate(selectedItem.rate);
-                b.setQuant(quant);
-
-                ofstream out("cart.csv", ios::app);
-                if (!out.is_open())
-                {
-                    cout << "\tError: Could not open cart.csv!" << endl;
-                }
-                else
-                {
-
-                    out << b.getItem() << "," << b.getRate() << "," << b.getQuant() << endl;
-                    cout << "\tItem Added Successfully!" << endl;
-                }
-                out.close();
+                cout << "\tError: Could not open cart.csv!" << endl;
             }
             else
             {
-                cout << "\tItem addition canceled." << endl;
+                // Write the item, rate, and quantity in CSV format
+                out << b.getItem() << "," << b.getRate() << "," << b.getQuant() << endl;
+                cout << "\tItem Added Successfully!" << endl;
             }
-
-            Sleep(2000);
+            out.close();
+            Sleep(2000); // 2 seconds pause for user confirmation
         }
         else if (choice == 2)
         {
@@ -898,10 +584,10 @@ void addItem(Cart &b)
 bool stock_store(string itemName, string rateStr, string quantityStr)
 {
     bool flag = true;
-    int quantityBill = stoi(quantityStr);
+    int quantityBill = stoi(quantityStr); // Quantity billed
 
-    ifstream in("stock.csv");
-    ofstream out("stock_temp.csv");
+    ifstream in("stock.csv");       // Reading from stock CSV file
+    ofstream out("stock_temp.csv"); // Temporary file to write updated stock
 
     if (!in.is_open() || !out.is_open())
     {
@@ -917,27 +603,31 @@ bool stock_store(string itemName, string rateStr, string quantityStr)
         stringstream ss(line);
         string stockItemName, stockRateStr, stockQuantityStr, stockDiscountStr;
 
+        // Splitting the line based on ',' delimiter
         getline(ss, stockItemName, ',');
         getline(ss, stockRateStr, ',');
         getline(ss, stockQuantityStr, ',');
         getline(ss, stockDiscountStr, ',');
 
-        stockItemName = trim1(stockItemName);
-        stockRateStr = trim1(stockRateStr);
-        stockQuantityStr = trim1(stockQuantityStr);
-        stockDiscountStr = trim1(stockDiscountStr);
+        // Trim spaces from the strings
+        stockItemName = trim(stockItemName);
+        stockRateStr = trim(stockRateStr);
+        stockQuantityStr = trim(stockQuantityStr);
+        stockDiscountStr = trim(stockDiscountStr);
 
         if (stockItemName == itemName)
         {
             itemFound = true;
 
+            // Convert stock quantity to integer
             int stockQuantity = stoi(stockQuantityStr);
 
+            // Update the stock by reducing the quantity billed
             int newQuantity = stockQuantity - quantityBill;
 
             if (newQuantity >= 0)
             {
-
+                // Write updated data to temporary file
                 out << stockItemName << "," << stockRateStr << "," << newQuantity << "," << stockDiscountStr << endl;
                 cout << "\tUpdated stock for " << itemName << ": " << newQuantity << " remaining." << endl;
             }
@@ -950,8 +640,10 @@ bool stock_store(string itemName, string rateStr, string quantityStr)
         }
         else
         {
-
+            // flag = false;
+            // Write the unmodified line for other items
             out << line << endl;
+            // cout << stockItemName << " is not available currently" << endl;
         }
     }
 
@@ -963,6 +655,7 @@ bool stock_store(string itemName, string rateStr, string quantityStr)
     in.close();
     out.close();
 
+    // Replace the original stock file with the updated file
     remove("stock.csv");
     rename("stock_temp.csv", "stock.csv");
     return flag;
@@ -978,6 +671,8 @@ void add_to_invoice(string itemName, string rateStr, string quantityStr, int amo
         return;
     }
 
+    // invoice << endl
+    //         << order << ",";
     invoice << itemName << "," << rateStr << "," << quantityStr << "," << amount << "," << discount << "," << discountedAmount << endl;
 
     invoice.close();
@@ -989,7 +684,7 @@ void printBill()
 
     while (!close)
     {
-
+        // system("cls");
         int choice;
         cout << endl
              << "\t1.Add Bill." << endl;
@@ -999,8 +694,8 @@ void printBill()
 
         if (choice == 1)
         {
-            ifstream in("cart.csv");
-            ofstream out("cart_temp.csv");
+            ifstream in("cart.csv");       // Reading the bill from CSV
+            ofstream out("cart_temp.csv"); // Writing to a temporary file
 
             if (!in.is_open())
             {
@@ -1010,7 +705,7 @@ void printBill()
 
             string line;
             int totalPrice = 0;
-            int totalDiscountedPrice = 0;
+            int totalDiscountedPrice = 0; // Total price after applying discounts
 
             cout << "\n\tItem | Rate | Quantity | Amount | Discount | Discounted Amount\n";
             cout << "\t---------------------------------------------------------------\n";
@@ -1021,22 +716,27 @@ void printBill()
                 string itemName, rateStr, quantityStr;
                 int rate = 0, quantity = 0;
 
+                // Splitting the line based on ',' delimiter
                 getline(ss, itemName, ',');
                 getline(ss, rateStr, ',');
                 getline(ss, quantityStr, ',');
 
-                itemName = trim1(itemName);
-                rateStr = trim1(rateStr);
-                quantityStr = trim1(quantityStr);
+                // Trim spaces
+                itemName = trim(itemName);
+                rateStr = trim(rateStr);
+                quantityStr = trim(quantityStr);
 
+                // Convert rate and quantity to integers
                 if (!rateStr.empty() && !quantityStr.empty() && isNumeric(rateStr) && isNumeric(quantityStr))
                 {
                     rate = stoi(rateStr);
                     quantity = stoi(quantityStr);
 
+                    // Calculate the total amount for this item
                     int amount = rate * quantity;
                     totalPrice += amount;
 
+                    // Retrieve the discount from stock.csv
                     ifstream stockFile("stock.csv");
                     string stockLine;
                     string discountStr;
@@ -1052,25 +752,29 @@ void printBill()
                         getline(stockSS, stockQuantityStr, ',');
                         getline(stockSS, stockDiscountStr, ',');
 
-                        stockItemName = trim1(stockItemName);
-                        stockDiscountStr = trim1(stockDiscountStr);
+                        stockItemName = trim(stockItemName);
+                        stockDiscountStr = trim(stockDiscountStr);
 
                         if (stockItemName == itemName)
                         {
-                            discount = stoi(stockDiscountStr);
+                            discount = stoi(stockDiscountStr); // Apply the discount
                             break;
                         }
                     }
                     stockFile.close();
 
+                    // Apply discount to calculate the discounted amount
                     int discountedAmount = amount - (amount * discount / 100);
                     totalDiscountedPrice += discountedAmount;
 
+                    // Display the details on the terminal
                     cout << "\t" << itemName << " | " << rate << " | " << quantity << " | " << amount
                          << " | " << discount << "% | " << discountedAmount << endl;
 
+                    // Write the data to the temporary bill CSV
                     out << itemName << "," << rate << "," << quantity << endl;
 
+                    // Call stock_manage() to update stock
                     bool flag = stock_store(itemName, rateStr, quantityStr);
                     if (flag)
                     {
@@ -1089,6 +793,7 @@ void printBill()
             out.close();
             in.close();
 
+            // Replace the original bill file with the updated file
             remove("cart.csv");
             rename("cart_temp.csv", "cart.csv");
         }
@@ -1102,57 +807,9 @@ void printBill()
     }
 
     // system("cls");
-    cout << endl
-         << "\tThanks for shopping!" << endl;
+    cout << "\tThanks for shopping!" << endl;
     // Sleep(5000); // Pause for 5 seconds
     order++;
-}
-
-void print_stock()
-{
-    ifstream inFile("stock.csv");
-
-    if (!inFile.is_open())
-    {
-        cout << "Error: Could not open stock.csv file!" << endl;
-        return;
-    }
-
-    string line;
-
-    string horizontalLine = "+-----------------+----------+----------+----------+";
-
-    cout << horizontalLine << endl;
-    cout << "| " << left << setw(15) << "Product Name"
-         << "| " << setw(8) << "Price"
-         << "| " << setw(8) << "Quantity"
-         << "| " << setw(8) << "Discount" << " |" << endl;
-    cout << horizontalLine << endl;
-
-    while (getline(inFile, line))
-    {
-        stringstream ss(line);
-        string productName, priceStr, quantityStr, discountStr;
-
-        getline(ss, productName, ',');
-        getline(ss, priceStr, ',');
-        getline(ss, quantityStr, ',');
-        getline(ss, discountStr, ',');
-
-        productName = trim1(productName);
-        priceStr = trim1(priceStr);
-        quantityStr = trim1(quantityStr);
-        discountStr = trim1(discountStr);
-
-        cout << "| " << left << setw(15) << productName
-             << "| " << right << setw(8) << priceStr
-             << "| " << right << setw(8) << quantityStr
-             << "| " << right << setw(8) << discountStr << " |" << endl;
-    }
-
-    cout << horizontalLine << endl;
-
-    inFile.close();
 }
 
 void manageStock()
@@ -1163,9 +820,8 @@ void manageStock()
     cout << "\t****************" << endl;
     cout << "\t1. Add New Item to Stock." << endl;
     cout << "\t2. Update Existing Stock." << endl;
-    cout << "\t3. Remove Item from Stock." << endl;
-    cout << "\t4. Print Stock." << endl;
-    cout << "\t5. Exit." << endl;
+    cout << "\t3. Remove Item from Stock." << endl; // New option for removing an item
+    cout << "\t4. Exit." << endl;
     cout << "\tEnter choice: ";
     cin >> choice;
 
@@ -1177,7 +833,7 @@ void manageStock()
 
     if (choice == 1)
     {
-
+        // Add new item to stock
         cout << "\tEnter Product Name: ";
         cin.ignore();
         getline(cin, productName);
@@ -1193,11 +849,11 @@ void manageStock()
         s.setQuantity(quantity);
         s.setDiscount(discount);
 
-        s.addToStock();
+        s.addToStock(); // Call to add the item to stock
     }
     else if (choice == 2)
     {
-
+        // Update existing item in stock
         cout << "\tEnter Product Name to Update: ";
         cin.ignore();
         getline(cin, productName);
@@ -1208,22 +864,18 @@ void manageStock()
         cout << "\tEnter New Discount (%): ";
         cin >> discount;
 
-        Stock::updateStock(productName, quantity, price, discount);
+        Stock::updateStock(productName, quantity, price, discount); // Static method to update stock
     }
     else if (choice == 3)
     {
-
+        // Remove item from stock
         cout << "\tEnter Product Name to Remove: ";
         cin.ignore();
         getline(cin, productName);
 
-        Stock::removeItem(productName);
+        Stock::removeItem(productName); // Call the static removeItem method
     }
     else if (choice == 4)
-    {
-        print_stock();
-    }
-    else if (choice == 5)
     {
         cout << "\tExiting stock management..." << endl;
     }
@@ -1234,20 +886,20 @@ void manageStock()
 }
 void clearBill()
 {
-    ofstream billFile("cart.csv", ios::trunc);
+    ofstream billFile("cart.csv", ios::trunc); // Open the bill file in trunc mode to clear its contents
 
     if (!billFile.is_open())
     {
-        cout << "\tError: Unable to open cart.csv file to clear it." << endl;
+        cout << "\tError: Unable to open bill.csv file to clear it." << endl;
         return;
     }
 
-    cout << "Cart has been cleared successfully!" << endl;
-    billFile.close();
+    cout << "\tBill has been cleared successfully!" << endl;
+    billFile.close(); // Close the file after clearing
 
-    ofstream invoice("invoice.csv", ios::app);
+    // ofstream invoice("invoice.csv", ios::app);
 
-    invoice << endl;
+    // invoice << endl;
 }
 void removeItemFromBill()
 {
@@ -1256,47 +908,53 @@ void removeItemFromBill()
     cin.ignore(); // to handle any newline characters in the input buffer
     getline(cin, itemToRemove);
 
-    ifstream inFile("cart.csv");
-    ofstream outFile("cart_temp.csv");
+    ifstream inFile("cart.csv");       // Open the bill.csv file for reading
+    ofstream outFile("cart_temp.csv"); // Temporary file for updated bill
 
     if (!inFile.is_open())
     {
-        cout << "\tError: Unable to open cart.csv file." << endl;
+        cout << "\tError: Unable to open bill.csv file." << endl;
         return;
     }
 
     bool itemFound = false;
     string line;
 
+    // Process each line in the bill.csv file
     while (getline(inFile, line))
     {
         stringstream ss(line);
         string itemName, rateStr, quantityStr;
 
+        // Extract the item name, rate, and quantity from the line
         getline(ss, itemName, ',');
         getline(ss, rateStr, ',');
         getline(ss, quantityStr, ',');
 
-        itemName = trim1(itemName);
+        // Trim any spaces
+        itemName = trim(itemName);
 
+        // Check if the current item matches the one to remove
         if (itemName == itemToRemove)
         {
             itemFound = true;
-            cout << "\tItem '" << itemToRemove << "' has been removed from the cart." << endl;
-            continue;
+            cout << "\tItem '" << itemToRemove << "' has been removed from the bill." << endl;
+            continue; // Skip adding this item to the temp file (i.e., remove it)
         }
 
+        // Write the remaining items to the temp file
         outFile << itemName << "," << rateStr << "," << quantityStr << endl;
     }
 
     if (!itemFound)
     {
-        cout << "\tItem '" << itemToRemove << "' not found in the cart." << endl;
+        cout << "\tItem '" << itemToRemove << "' not found in the bill." << endl;
     }
 
     inFile.close();
     outFile.close();
 
+    // Replace the original bill.csv with the updated temp file
     remove("cart.csv");
     rename("cart_temp.csv", "cart.csv");
 }
@@ -1372,7 +1030,7 @@ int main()
 
     while (!exit)
     {
-        Sleep(1000);
+        Sleep(1000); // Less wait time for smoother experience
         displayHeader("Main Menu");
 
         int roleChoice;
@@ -1384,7 +1042,7 @@ int main()
         cout << "\t\tEnter Choice: ";
         cin >> roleChoice;
 
-        if (roleChoice == 1)
+        if (roleChoice == 1) // Admin Section
         {
             int loginChoice;
             displayHeader("Admin Login/Registration");
@@ -1399,7 +1057,7 @@ int main()
                 registerAdmin();
                 Sleep(1000);
             }
-            else if (loginChoice == 2 && loginAdmin())
+            else if (loginChoice == 2 && loginAdmin()) // If login is successful
             {
                 bool adminExit = false;
                 while (!adminExit)
@@ -1411,8 +1069,7 @@ int main()
                     cout << "\tAdmin Section Menu" << endl;
                     cout << "\t===================" << endl;
                     cout << "\t1. Manage Stock." << endl;
-                    cout << "\t2. Print Report." << endl;
-                    cout << "\t3. Exit to Main Menu." << endl;
+                    cout << "\t2. Exit to Main Menu." << endl;
                     printDivider();
                     cout << "\tEnter Choice: ";
                     cin >> adminChoice;
@@ -1420,33 +1077,17 @@ int main()
                     if (adminChoice == 1)
                     {
                         displayHeader("Stock Management");
-                        manageStock();
+                        manageStock(); // Admin manages the stock
                         Sleep(1000);
                     }
                     else if (adminChoice == 2)
-                    {
-                        SalesReport report;
-                        report.readInvoiceData("invoice.csv");
-                        report.readStockData("inventory.csv");
-                        report.printHeader();
-                        report.generateSalesReport();
-                        report.profitAnalysis();
-                        report.stockLevelAnalysis();
-                        report.topSellingProducts();
-                        report.unsoldStockAnalysis();
-                        cout << endl
-                             << "Remaining Stock : " << endl;
-                        print_stock();
-                        report.printFooter();
-                    }
-                    else if (adminChoice == 3)
                     {
                         adminExit = true;
                     }
                 }
             }
         }
-        else if (roleChoice == 2)
+        else if (roleChoice == 2) // Customer Section
         {
             int loginChoice;
             displayHeader("Customer Login/Registration");
@@ -1461,7 +1102,7 @@ int main()
                 registerCustomer();
                 Sleep(1000);
             }
-            else if (loginChoice == 2 && loginCustomer())
+            else if (loginChoice == 2 && loginCustomer()) // If login is successful
             {
                 bool customerExit = false;
                 while (!customerExit)
@@ -1485,7 +1126,7 @@ int main()
                     {
                         displayHeader("Add Item to Cart");
                         addArt();
-                        addItem(b);
+                        addItem(b); // Add item for the customer bill
                         Sleep(1000);
                     }
                     else if (val == 2)
@@ -1505,21 +1146,21 @@ int main()
                     {
                         displayHeader("Bill");
                         printBillArt();
-                        printBill();
+                        printBill(); // Print the customer's bill
                         Sleep(1000);
                     }
                     else if (val == 5)
                     {
-                        customerExit = true;
+                        customerExit = true; // Go back to main menu
                     }
                 }
             }
         }
-        else if (roleChoice == 3)
+        else if (roleChoice == 3) // Exit the system
         {
             exit = true;
             displayHeader("Exiting...");
-            cout << "\tGoodbye! " << endl;
+            cout << "\tGoodbye!" << endl;
             cout << "\tThank you for using the Super Market Billing System!" << endl;
             Sleep(2000);
         }
