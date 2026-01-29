@@ -28,6 +28,15 @@ This C++-based application is designed to manage inventory for a retail store. I
 * C++ compiler (e.g., GCC, Clang)
 * Standard C++ libraries
 
+**Preview:**
+<img width="1902" height="1024" alt="image" src="https://github.com/user-attachments/assets/7479cd5e-842c-4e57-856a-0864b99ce841" />
+<img width="1919" height="1016" alt="image" src="https://github.com/user-attachments/assets/840d417a-6c1c-4abf-9150-b944d08df787" />
+<img width="1919" height="1026" alt="image" src="https://github.com/user-attachments/assets/df782bbe-dfdd-44cf-8f5b-aecd44799263" />
+<img width="1898" height="991" alt="image" src="https://github.com/user-attachments/assets/1bda2928-c6ef-4718-95fb-6eb225823b64" />
+<img width="1917" height="1015" alt="image" src="https://github.com/user-attachments/assets/6bf9d61b-0aa4-4b7e-b903-bab5b3c559b7" />
+<img width="1914" height="992" alt="image" src="https://github.com/user-attachments/assets/a162f7eb-6d5f-47f8-89c8-e7e86fb0095e" />
+
+
 **Usage:**
 1. **Compile:**
    - Open a terminal or command prompt.
